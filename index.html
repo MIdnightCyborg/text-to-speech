@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        audio {
+            margin-top: 10px;
+            width: 100%;
+            display: none; /* Hide since we're not using this */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <textarea id="text-input" placeholder="Enter your text here..."></textarea>
+    <select id="voice-select">
+        <!-- Voices will be dynamically populated here -->
+    </select>
+    <button id="generate-button">Generate Preview</button>
+    <audio id="audio-preview" controls></audio>
+</div>
+
+<script>
+    const generateButton = document.getElementById('generate-button');
+    const textInput = document.getElementById('text-input');
+    const voiceSelect = document.getElementById('voice-select');
+
+    // Populate the list of voices
+    function populateVoiceList() {
+        const voices = speechSynthesis.getVoices();
+        voiceSelect.innerHTML = '';
+        voices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${voice.name} (${voice.lang})`;
+            voiceSelect.appendChild(option);
+        });
+    }
+
+    // Check if voices are loaded and populate the select box
+    populateVoiceList();
+    if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
+
+    generateButton.addEventListener('click', () => {
+        const text = textInput.value.trim();
+        if (text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            const selectedVoiceIndex = voiceSelect.value;
+            const voices = speechSynthesis.getVoices();
+            utterance.voice = voices[selectedVoiceIndex];
+
+            // Play the speech using Web Speech API
+            window.speechSynthesis.speak(utterance);
+        } else {
+            alert('Please enter some text!');
+        }
+    });
+</script>
+
+</body>
+</html>
